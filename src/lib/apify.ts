@@ -66,11 +66,12 @@ function formatDate(raw: string | undefined): string {
     const posted = new Date(raw);
     const now = new Date();
     const diffDays = Math.floor((now.getTime() - posted.getTime()) / (1000 * 60 * 60 * 24));
-    if (diffDays === 0) return "Today";
+    if (diffDays <= 0) return "Posted today";
     if (diffDays === 1) return "1 day ago";
     if (diffDays < 7) return `${diffDays} days ago`;
-    if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`;
-    return `${Math.floor(diffDays / 30)} months ago`;
+    if (diffDays < 30) return `${Math.floor(diffDays / 7)} week${Math.floor(diffDays / 7) === 1 ? "" : "s"} ago`;
+    const months = Math.floor(diffDays / 30);
+    return `${months} month${months === 1 ? "" : "s"} ago`;
   } catch {
     return "Recently";
   }
