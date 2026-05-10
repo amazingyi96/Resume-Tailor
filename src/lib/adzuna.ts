@@ -58,9 +58,15 @@ function formatSalary(raw: AdzunaRawJob): string {
 
 function formatEmploymentType(raw: AdzunaRawJob): string {
   const types: string[] = [];
-  if (raw.contract_type) types.push(raw.contract_type.charAt(0).toUpperCase() + raw.contract_type.slice(1));
-  if (raw.contract_time) types.push(raw.contract_time.charAt(0).toUpperCase() + raw.contract_time.slice(1));
-  return types.length > 0 ? types.join(" / ") : "Full-time";
+  if (raw.contract_type) {
+    const ct = raw.contract_type.replace(/_/g, " ");
+    types.push(ct.charAt(0).toUpperCase() + ct.slice(1));
+  }
+  if (raw.contract_time) {
+    const ctm = raw.contract_time.replace(/_/g, " ");
+    types.push(ctm.charAt(0).toUpperCase() + ctm.slice(1));
+  }
+  return types.length > 0 ? types.join(" — ") : "Full-time";
 }
 
 function formatDate(created?: string): string {
@@ -71,8 +77,9 @@ function formatDate(created?: string): string {
   if (diffDays === 0) return "Today";
   if (diffDays === 1) return "1 day ago";
   if (diffDays < 7) return `${diffDays} days ago`;
-  if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`;
-  return `${Math.floor(diffDays / 30)} months ago`;
+  if (diffDays < 30) return `${Math.floor(diffDays / 7)} week${Math.floor(diffDays / 7) === 1 ? "" : "s"} ago`;
+  const months = Math.floor(diffDays / 30);
+  return `${months} month${months === 1 ? "" : "s"} ago`;
 }
 
 function formatJob(raw: AdzunaRawJob): StructuredJob {

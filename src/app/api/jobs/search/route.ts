@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { callDeepSeek } from "@/lib/claude";
 import { parseClaudeJSON } from "@/lib/parser";
 import { searchAdzunaJobs, type StructuredJob } from "@/lib/adzuna";
+import { searchLinkedInJobs } from "@/lib/apify";
 import { searchDuckDuckGoJobs } from "@/lib/duckduckgo";
 
 interface JobListing extends StructuredJob {}
@@ -35,7 +36,22 @@ export async function POST(request: Request) {
     const allJobs: JobListing[] = [];
     const errors: string[] = [];
 
-    // Source 1: Adzuna — primary, best quality individual job listings
+    // Source 1: LinkedIn via Apify — direct job listings with real apply URLs
+    try {
+      const linkedinJobs = await searchLinkedInJobs({
+        keywords: keywords.trim(),
+        location: location.trim(),
+        country: countryName,
+        limit: Math.ceil(limit / 2),
+      });
+      if (linkedinJobs && linkedinJobs.length > 0) {
+        allJobs.push(...linkedinJobs);
+      }
+    } catch (err) {
+      errors.push(`LinkedIn: ${(err as Error).message}`);
+    }
+
+    // Source 2: Adzuna — aggregates all major AU job boards
     try {
       const adzunaJobs = await searchAdzunaJobs({
         keywords: keywords.trim(),
@@ -50,7 +66,7 @@ export async function POST(request: Request) {
       errors.push(`Adzuna: ${(err as Error).message}`);
     }
 
-    // Source 2: DuckDuckGo — supplements with web search for individual listings
+    // Source 3: DuckDuckGo — supplements with web search for individual listings
     if (allJobs.length < limit) {
       try {
         const ddgJobs = await searchDuckDuckGoJobs({
@@ -72,6 +88,19 @@ export async function POST(request: Request) {
     let uniqueJobs = allJobs.filter((j) => {
       if (seen.has(j.directUrl)) return false;
       seen.add(j.directUrl);
+      return true;
+    });
+
+    // Filter: only last 60 days (Adzuna free tier sometimes has stale listings)
+    const now = Date.now();
+    const SIXTY_DAYS = 60 * 24 * 60 * 60 * 1000;
+    uniqueJobs = uniqueJobs.filter((j) => {
+      if (j.postedDate === "Recently" || j.postedDate === "Today") return true;
+      if (j.postedDate.includes("day") || j.postedDate.includes("week")) return true;
+      if (j.postedDate.includes("month")) {
+        const months = parseInt(j.postedDate) || 2;
+        return months <= 2;
+      }
       return true;
     });
 

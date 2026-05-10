@@ -10,18 +10,29 @@ interface ApifyJobInput {
 
 interface ApifyRawJob {
   title?: string;
+  job_title?: string;
   companyName?: string;
-  company?: string;
+  company_name?: string;
   location?: string;
   url?: string;
+  job_url?: string;
   link?: string;
   description?: string;
+  job_description?: string;
   salary?: string;
-  datePosted?: string;
+  salary_range?: string;
+  postedDate?: string;
+  time_posted?: string;
   employmentType?: string;
+  employment_type?: string;
+  seniority_level?: string;
+  job_function?: string;
+  industries?: string;
+  easy_apply?: string;
+  apply_url?: string;
 }
 
-interface StructuredJob {
+export interface StructuredJob {
   title: string;
   company: string;
   location: string;
@@ -44,98 +55,106 @@ function isTokenConfigured(): boolean {
   return !!token && token.length > 10 && token !== "your-apify-token";
 }
 
-async function runGoogleJobsScraper(
-  input: ApifyJobInput
-): Promise<ApifyRawJob[]> {
-  const token = getToken();
-  const actorId = "curious_coder/linkedin-jobs-scraper";
-
-  const response = await fetch(
-    `${APIFY_BASE}/acts/${actorId}/runs?token=${token}&waitForFinish=120`,
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        keywords: input.keywords,
-        location: `${input.location}, ${input.country}`,
-        limit: input.limit || 8,
-      }),
-    }
-  );
-
-  if (!response.ok) {
-    const errText = await response.text();
-    throw new Error(`Apify actor start failed: ${response.status} ${errText}`);
+function formatDate(raw: string | undefined): string {
+  if (!raw) return "Recently";
+  // Handle "X hours ago", "X days ago" etc from time_posted
+  if (raw.includes("hour") || raw.includes("minute") || raw.includes("day") || raw.includes("week")) {
+    return raw;
   }
-
-  const run = await response.json();
-  const defaultDatasetId = run.data?.defaultDatasetId;
-
-  if (!defaultDatasetId) {
-    throw new Error("Apify run completed but no dataset found");
+  // Handle ISO date strings
+  try {
+    const posted = new Date(raw);
+    const now = new Date();
+    const diffDays = Math.floor((now.getTime() - posted.getTime()) / (1000 * 60 * 60 * 24));
+    if (diffDays === 0) return "Today";
+    if (diffDays === 1) return "1 day ago";
+    if (diffDays < 7) return `${diffDays} days ago`;
+    if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`;
+    return `${Math.floor(diffDays / 30)} months ago`;
+  } catch {
+    return "Recently";
   }
-
-  const datasetRes = await fetch(
-    `${APIFY_BASE}/datasets/${defaultDatasetId}/items?token=${token}&limit=${input.limit || 8}`
-  );
-
-  if (!datasetRes.ok) {
-    throw new Error("Failed to fetch Apify dataset");
-  }
-
-  return datasetRes.json();
 }
 
-function formatJob(raw: ApifyRawJob, idx: number): StructuredJob {
-  const title = raw.title || "Untitled Position";
-  const company = raw.companyName || raw.company || "Confidential";
+function formatJob(raw: ApifyRawJob): StructuredJob {
+  const title = raw.title || raw.job_title || "Untitled Position";
+  const company = raw.companyName || raw.company_name || "Confidential";
   const location = raw.location || "Australia";
-  const directUrl = raw.url || raw.link || "";
-  const description = raw.description || "";
-  const salary = raw.salary || "Not disclosed";
-  const employmentType = raw.employmentType || "Full-time";
-  const postedDate = raw.datePosted || "Recently";
-
-  // Determine source from the URL
-  let source = "Company Website";
-  if (directUrl.includes("linkedin.com")) source = "LinkedIn";
-  else if (directUrl.includes("seek.com.au")) source = "SEEK";
-  else if (directUrl.includes("indeed.com")) source = "Indeed";
-  else if (directUrl.includes("jora.com")) source = "Jora";
-  else if (directUrl.includes("ethicaljobs")) source = "EthicalJobs";
-  else if (directUrl.includes("google.com")) source = "Google Jobs";
+  const directUrl = raw.url || raw.job_url || raw.link || raw.apply_url || "";
+  const description = (raw.description || raw.job_description || "").replace(/<[^>]+>/g, "").trim().slice(0, 2500);
+  const salary = raw.salary || raw.salary_range || "Not disclosed";
+  const employmentType = raw.employmentType || raw.employment_type || "Full-time";
+  const postedDate = formatDate(raw.postedDate || raw.time_posted);
 
   return {
     title,
     company,
     location,
     directUrl,
-    description: description.slice(0, 600),
+    description,
     salary,
-    experienceRequirements: "See description",
+    experienceRequirements: raw.seniority_level ? `${raw.seniority_level} level` : "See listing",
     skillsRequired: [],
     employmentType,
-    source,
+    source: "LinkedIn",
     postedDate,
   };
 }
 
-export async function searchRealJobs(
+export async function searchLinkedInJobs(
   input: ApifyJobInput
-): Promise<{ jobs: StructuredJob[]; source: string } | null> {
+): Promise<StructuredJob[] | null> {
   if (!isTokenConfigured()) {
-    console.log("Apify token not configured, skipping real job search");
+    console.log("Apify token not configured, skipping LinkedIn search");
     return null;
   }
 
+  const token = getToken();
+  const actorId = "valig~linkedin-jobs-scraper";
+  const limit = Math.min(input.limit || 8, 20);
+
   try {
-    const rawJobs = await runGoogleJobsScraper(input);
+    // Start actor run
+    const runUrl = `${APIFY_BASE}/acts/${actorId}/runs?token=${token}&waitForFinish=120`;
+    const response = await fetch(runUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        role: input.keywords,
+        location: `${input.location}, ${input.country}`,
+        maxResults: limit,
+      }),
+    });
+
+    if (!response.ok) {
+      const errText = await response.text();
+      throw new Error(`Apify run failed: ${response.status} ${errText}`);
+    }
+
+    const run = await response.json();
+    const defaultDatasetId = run.data?.defaultDatasetId;
+
+    if (!defaultDatasetId) {
+      console.log("Apify run completed but no dataset");
+      return null;
+    }
+
+    // Fetch dataset items
+    const datasetUrl = `${APIFY_BASE}/datasets/${defaultDatasetId}/items?token=${token}&limit=${limit}`;
+    const datasetRes = await fetch(datasetUrl);
+
+    if (!datasetRes.ok) {
+      throw new Error("Failed to fetch Apify dataset");
+    }
+
+    const rawJobs: ApifyRawJob[] = await datasetRes.json();
+
     if (!rawJobs || rawJobs.length === 0) return null;
 
-    const jobs = rawJobs.slice(0, input.limit || 8).map(formatJob);
-    return { jobs, source: "apify" };
+    const jobs = rawJobs.slice(0, limit).map(formatJob);
+    return jobs;
   } catch (err) {
-    console.error("Apify job search failed:", err);
+    console.error("Apify LinkedIn search failed:", err);
     return null;
   }
 }
