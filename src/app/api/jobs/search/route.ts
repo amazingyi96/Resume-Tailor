@@ -104,15 +104,19 @@ export async function POST(request: Request) {
       return true;
     });
 
-    // Client-side filter: rank by keyword match in title
-    const keywordParts = keywords.toLowerCase().split(/\s+/);
+    // Client-side filter: primary keyword (first word) MUST be in title
+    const keywordParts = keywords.toLowerCase().split(/\s+/).filter(k => k.length > 1);
+    const primaryKeyword = keywordParts[0] || "";
     uniqueJobs = uniqueJobs
       .map((j) => {
         const titleLower = j.title.toLowerCase();
         const matchCount = keywordParts.filter((kw) => titleLower.includes(kw)).length;
         return { job: j, matchCount };
       })
-      .filter(({ matchCount }) => matchCount >= Math.ceil(keywordParts.length / 2)) // at least half the keywords match
+      .filter(({ job }) => {
+        if (!primaryKeyword) return true;
+        return job.title.toLowerCase().includes(primaryKeyword);
+      })
       .sort((a, b) => b.matchCount - a.matchCount)
       .map(({ job }) => job);
 

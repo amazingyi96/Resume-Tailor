@@ -42,3 +42,9 @@ next-env.d.ts
 .claude/*
 *.pdf
 *.docx
+*.jpg
+*.png
+*.JPG
+*.PNG
+*.mov
+*.MOV

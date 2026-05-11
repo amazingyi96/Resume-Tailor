@@ -133,40 +133,58 @@ export async function searchAdzunaJobs(
   if (!creds) return null;
 
   const resultsPerPage = Math.min(input.limit || 15, 50);
-  const where = input.location.trim(); // pass raw — Adzuna does fuzzy matching
+  const userLocation = input.location.trim();
 
-  // Fetch up to 2 pages for better coverage
+  // Strategy: search with specific location first, fall back to Australia-wide
+  const searchLocations = [userLocation];
+  if (!userLocation.toLowerCase().includes("australia")) {
+    searchLocations.push("Australia");
+  }
+
   const allJobs: StructuredJob[] = [];
 
-  for (let page = 1; page <= 2; page++) {
-    const url = new URL(`${ADZUNA_BASE}/jobs/au/search/${page}`);
-    url.searchParams.set("app_id", creds.appId);
-    url.searchParams.set("app_key", creds.appKey);
-    url.searchParams.set("what", input.keywords.trim());
-    url.searchParams.set("where", where);
-    url.searchParams.set("results_per_page", resultsPerPage.toString());
+  for (const where of searchLocations) {
+    for (let page = 1; page <= 2; page++) {
+      const url = new URL(`${ADZUNA_BASE}/jobs/au/search/${page}`);
+      url.searchParams.set("app_id", creds.appId);
+      url.searchParams.set("app_key", creds.appKey);
+      url.searchParams.set("what", input.keywords.trim());
+      url.searchParams.set("where", where);
+      url.searchParams.set("results_per_page", Math.min(20, resultsPerPage).toString());
+      url.searchParams.set("max_days_old", "30");
 
-    try {
-      const response = await fetch(url.toString());
+      try {
+        const response = await fetch(url.toString());
 
-      if (!response.ok) {
-        console.error(`Adzuna page ${page} error:`, response.status);
+        if (!response.ok) {
+          console.error(`Adzuna ${where} page ${page} error:`, response.status);
+          break;
+        }
+
+        const json = await response.json();
+        const pageJobs: AdzunaRawJob[] = json.results || [];
+
+        if (pageJobs.length === 0) break;
+
+        allJobs.push(...pageJobs.map(formatJob));
+
+        if (allJobs.length >= resultsPerPage) break;
+      } catch (err) {
+        console.error(`Adzuna ${where} page ${page} failed:`, err);
         break;
       }
-
-      const json = await response.json();
-      const pageJobs: AdzunaRawJob[] = json.results || [];
-
-      if (pageJobs.length === 0) break;
-
-      allJobs.push(...pageJobs.map(formatJob));
-
-      if (allJobs.length >= resultsPerPage) break;
-    } catch (err) {
-      console.error(`Adzuna page ${page} failed:`, err);
-      break;
     }
+
+    if (allJobs.length >= resultsPerPage) break;
   }
+
+  // Sort: prefer jobs in the user's requested location
+  const locationLower = userLocation.toLowerCase();
+  allJobs.sort((a, b) => {
+    const aMatch = a.location.toLowerCase().includes(locationLower) ? 1 : 0;
+    const bMatch = b.location.toLowerCase().includes(locationLower) ? 1 : 0;
+    return bMatch - aMatch;
+  });
 
   return allJobs.length > 0 ? allJobs.slice(0, resultsPerPage) : null;
 }
