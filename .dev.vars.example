@@ -1,0 +1,15 @@
+# DeepSeek AI API (required — all routes depend on it)
+DEEPSEEK_API_KEY=sk-your-key-here
+
+# Adzuna Job Search API (optional — job search degrades gracefully without it)
+ADZUNA_APP_ID=your-app-id
+ADZUNA_APP_KEY=your-app-key
+
+# Apify LinkedIn Scraper (optional — job search degrades gracefully without it)
+APIFY_API_TOKEN=apify_api_your-token-here
+
+# JSearch API (optional — currently unused, kept for future use)
+JSEARCH_API_KEY=your-key-here
+
+# Next.js environment
+NEXTJS_ENV=development

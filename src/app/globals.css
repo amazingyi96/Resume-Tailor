@@ -34,57 +34,57 @@
 }
 
 :root {
-  --background: hsl(38 30% 96%);
-  --foreground: hsl(30 10% 12%);
+  --background: hsl(200 35% 97%);
+  --foreground: hsl(210 10% 12%);
   --card: hsl(0 0% 100%);
-  --card-foreground: hsl(30 10% 12%);
+  --card-foreground: hsl(210 10% 12%);
   --popover: hsl(0 0% 100%);
-  --popover-foreground: hsl(30 10% 12%);
-  --primary: hsl(245 40% 48%);
+  --popover-foreground: hsl(210 10% 12%);
+  --primary: hsl(195 50% 45%);
   --primary-foreground: hsl(0 0% 100%);
-  --secondary: hsl(38 20% 92%);
-  --secondary-foreground: hsl(30 10% 12%);
-  --muted: hsl(38 15% 93%);
-  --muted-foreground: hsl(30 6% 48%);
-  --accent: hsl(245 40% 48%);
+  --secondary: hsl(200 20% 93%);
+  --secondary-foreground: hsl(210 10% 12%);
+  --muted: hsl(200 15% 94%);
+  --muted-foreground: hsl(210 6% 48%);
+  --accent: hsl(170 40% 40%);
   --accent-foreground: hsl(0 0% 100%);
   --destructive: hsl(0 55% 55%);
   --destructive-foreground: hsl(0 0% 100%);
-  --border: hsl(38 15% 88%);
-  --input: hsl(38 15% 88%);
-  --ring: hsl(245 40% 48%);
-  --chart-1: hsl(250 55% 52%);
-  --chart-2: hsl(220 50% 48%);
-  --chart-3: hsl(190 45% 42%);
-  --chart-4: hsl(280 45% 48%);
-  --chart-5: hsl(340 50% 52%);
+  --border: hsl(200 15% 88%);
+  --input: hsl(200 15% 88%);
+  --ring: hsl(195 50% 45%);
+  --chart-1: hsl(195 50% 48%);
+  --chart-2: hsl(170 40% 42%);
+  --chart-3: hsl(210 40% 48%);
+  --chart-4: hsl(160 35% 45%);
+  --chart-5: hsl(220 35% 50%);
 }
 
 .dark {
-  --background: hsl(235 30% 6%);
-  --foreground: hsl(240 20% 95%);
-  --card: hsl(235 25% 10%);
-  --card-foreground: hsl(240 20% 95%);
-  --popover: hsl(235 25% 12%);
-  --popover-foreground: hsl(240 20% 95%);
-  --primary: hsl(260 70% 70%);
-  --primary-foreground: hsl(235 30% 6%);
-  --secondary: hsl(235 20% 18%);
-  --secondary-foreground: hsl(240 20% 95%);
-  --muted: hsl(235 20% 18%);
-  --muted-foreground: hsl(240 10% 60%);
-  --accent: hsl(170 60% 50%);
-  --accent-foreground: hsl(235 30% 6%);
+  --background: hsl(205 25% 7%);
+  --foreground: hsl(210 20% 95%);
+  --card: hsl(205 20% 10%);
+  --card-foreground: hsl(210 20% 95%);
+  --popover: hsl(205 20% 12%);
+  --popover-foreground: hsl(210 20% 95%);
+  --primary: hsl(195 55% 58%);
+  --primary-foreground: hsl(205 25% 7%);
+  --secondary: hsl(205 15% 18%);
+  --secondary-foreground: hsl(210 20% 95%);
+  --muted: hsl(205 15% 18%);
+  --muted-foreground: hsl(205 10% 58%);
+  --accent: hsl(170 45% 52%);
+  --accent-foreground: hsl(205 25% 7%);
   --destructive: hsl(0 62% 45%);
   --destructive-foreground: hsl(0 0% 98%);
-  --border: hsl(235 20% 20%);
-  --input: hsl(235 20% 20%);
-  --ring: hsl(260 70% 70%);
-  --chart-1: hsl(260 70% 65%);
-  --chart-2: hsl(170 60% 50%);
-  --chart-3: hsl(40 70% 55%);
-  --chart-4: hsl(200 60% 55%);
-  --chart-5: hsl(340 60% 55%);
+  --border: hsl(205 15% 20%);
+  --input: hsl(205 15% 20%);
+  --ring: hsl(195 55% 58%);
+  --chart-1: hsl(195 50% 55%);
+  --chart-2: hsl(170 45% 50%);
+  --chart-3: hsl(210 40% 55%);
+  --chart-4: hsl(160 35% 50%);
+  --chart-5: hsl(220 40% 58%);
 }
 
 body {
@@ -96,13 +96,13 @@ body {
 
 /* Glassmorphism effect — light: crisp, clean */
 .glass {
-  background: rgba(255, 255, 255, 0.75);
+  background: rgba(255, 255, 255, 0.78);
   backdrop-filter: blur(24px);
-  border: 1px solid rgba(0, 0, 0, 0.06);
+  border: 1px solid rgba(0, 0, 0, 0.05);
 }
 
 .dark .glass {
-  background: rgba(15, 15, 20, 0.65);
+  background: rgba(10, 18, 28, 0.65);
   border: 1px solid rgba(255, 255, 255, 0.06);
 }
 

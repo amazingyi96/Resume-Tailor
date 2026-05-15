@@ -138,3 +138,30 @@ Output ONLY valid JSON:
 
   return { system, user };
 }
+
+export function buildJobExtractPrompt(pageText: string) {
+  const system = `You are a job posting data extractor. Extract structured job details from the provided web page text (which may contain navigation, footer, and other non-job content mixed in with the actual job posting).
+
+Return ONLY valid JSON. No markdown code fences, no preamble, no postamble. The JSON must match this exact structure:
+{
+  "company": string | null,
+  "position": string | null,
+  "location": string | null,
+  "industry": string | null,
+  "jobType": string | null,
+  "salary": string | null
+}
+
+Rules:
+- company: The hiring company name. Look for "About [Company]", "[Company] is hiring", or company branding.
+- position: The job title / role name. Usually near the top of the listing.
+- location: City and state/region. For Australian jobs, format like "Dubbo, NSW" or "Perth, WA". Include "Remote" if fully remote.
+- industry: Infer from company type and role context. Use Australian-relevant categories like "Technology & IT", "Healthcare & Medical", "Education & Training", "Government & Public Sector", "Professional Services", "Tourism & Events", "Mining & Resources", "Agriculture & Farming", "Retail & Consumer Goods", "Manufacturing & Logistics", "Hospitality & Tourism", "Real Estate & Property", "Other".
+- jobType: One of "Full-time", "Part-time", "Contract", "Casual", "Fixed-term", "Remote". Look for explicit mentions.
+- salary: Salary range if explicitly mentioned. Keep original format (e.g. "$85,000 - $95,000" or "$90K + super").
+- Return null for any field you cannot confidently determine. Do NOT guess or make up values.`;
+
+  const user = `WEB PAGE TEXT:\n\n${pageText.slice(0, 12000)}`;
+
+  return { system, user };
+}

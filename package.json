@@ -3,10 +3,12 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev -H 0.0.0.0",
     "build": "next build",
+    "dev": "next dev -H 0.0.0.0",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "deploy:ecs": "bash scripts/deploy.sh",
+    "backup": "bash scripts/backup.sh"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.15",
@@ -21,10 +23,8 @@
     "@radix-ui/react-tooltip": "^1.2.8",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
-    "diff": "^9.0.0",
     "docx": "^9.6.1",
     "framer-motion": "^12.38.0",
-    "html2canvas": "^1.4.1",
     "jspdf": "^4.2.1",
     "lucide-react": "^1.14.0",
     "mammoth": "^1.12.0",
@@ -32,7 +32,6 @@
     "next-themes": "^0.4.6",
     "openai": "^6.37.0",
     "pdfjs-dist": "^4.0.379",
-    "puppeteer": "^24.43.1",
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "react-icons": "^5.6.0",

@@ -46,6 +46,12 @@ export default function Home() {
     hasResults,
   } = useTailor();
 
+  useEffect(() => {
+    if (typeof window !== "undefined" && window.location.hostname.startsWith("jobtracker.")) {
+      window.location.replace("/tracker");
+    }
+  }, []);
+
   const isLoading =
     state.workflowPhase !== "idle" &&
     state.workflowPhase !== "done" &&

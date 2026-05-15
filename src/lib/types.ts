@@ -99,3 +99,54 @@ export interface TailorErrorResponse {
 }
 
 export type TailorResponse = TailorSuccessResponse | TailorErrorResponse;
+
+// ── Job Application Tracker ──
+
+export type ApplicationStatus =
+  | "saved"
+  | "applied"
+  | "phone_screen"
+  | "interview"
+  | "offer"
+  | "accepted"
+  | "rejected"
+  | "withdrawn";
+
+export type NoteType =
+  | "general"
+  | "research"
+  | "interview_prep"
+  | "reflection"
+  | "follow_up";
+
+export interface ApplicationNote {
+  id: string;
+  type: NoteType;
+  content: string;
+  createdAt: string;
+}
+
+export interface JobApplication {
+  id: string;
+  company: string;
+  position: string;
+  location: string;
+  industry: string;
+  jobType: string;
+  applicationDate: string;
+  status: ApplicationStatus;
+  sourceUrl: string;
+  salary: string;
+  contactName: string;
+  contactEmail: string;
+  contactPhone: string;
+  notes: ApplicationNote[];
+  followUpDate: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ApplicationStorageSchema {
+  version: 1;
+  applications: JobApplication[];
+}

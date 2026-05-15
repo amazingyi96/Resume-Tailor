@@ -1,5 +1,5 @@
-import type { Version, StorageSchema } from "./types";
-import { STORAGE_KEY_VERSIONS, STORAGE_KEY_LAST_SESSION } from "./constants";
+import type { Version, StorageSchema, JobApplication, ApplicationStorageSchema } from "./types";
+import { STORAGE_KEY_VERSIONS, STORAGE_KEY_LAST_SESSION, STORAGE_KEY_APPLICATIONS } from "./constants";
 
 const DEFAULT_SCHEMA: StorageSchema = { version: 1, versions: [] };
 
@@ -74,4 +74,58 @@ export function loadLastSession(): {
   } catch {
     return null;
   }
+}
+
+// ── Job Application Tracker ──
+
+const DEFAULT_APP_SCHEMA: ApplicationStorageSchema = { version: 1, applications: [] };
+
+function readApplications(): ApplicationStorageSchema {
+  if (typeof window === "undefined") return DEFAULT_APP_SCHEMA;
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY_APPLICATIONS);
+    if (!raw) return DEFAULT_APP_SCHEMA;
+    const parsed = JSON.parse(raw);
+    if (parsed?.version === 1 && Array.isArray(parsed.applications)) {
+      return parsed as ApplicationStorageSchema;
+    }
+    return DEFAULT_APP_SCHEMA;
+  } catch {
+    return DEFAULT_APP_SCHEMA;
+  }
+}
+
+function writeApplications(schema: ApplicationStorageSchema): void {
+  if (typeof window === "undefined") return;
+  localStorage.setItem(STORAGE_KEY_APPLICATIONS, JSON.stringify(schema));
+}
+
+export function loadApplications(): JobApplication[] {
+  return readApplications().applications;
+}
+
+export function saveApplication(app: JobApplication): void {
+  const schema = readApplications();
+  const idx = schema.applications.findIndex((a) => a.id === app.id);
+  if (idx >= 0) {
+    schema.applications[idx] = app;
+  } else {
+    schema.applications.unshift(app);
+  }
+  if (schema.applications.length > 200) {
+    schema.applications = schema.applications
+      .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+      .slice(0, 200);
+  }
+  writeApplications(schema);
+}
+
+export function deleteApplication(id: string): void {
+  const schema = readApplications();
+  schema.applications = schema.applications.filter((a) => a.id !== id);
+  writeApplications(schema);
+}
+
+export function getApplication(id: string): JobApplication | undefined {
+  return readApplications().applications.find((a) => a.id === id);
 }

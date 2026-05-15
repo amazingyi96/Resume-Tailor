@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { History } from "lucide-react";
+import { History, Briefcase } from "lucide-react";
 import { ThemeToggle } from "./theme-toggle";
 import { APP_NAME } from "@/lib/constants";
 
@@ -26,6 +26,15 @@ export function AppHeader() {
             >
               <History className="h-4 w-4" />
               <span className="hidden sm:inline">History</span>
+            </button>
+          </Link>
+          <Link href="/tracker">
+            <button
+              type="button"
+              className="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+            >
+              <Briefcase className="h-4 w-4" />
+              <span className="hidden sm:inline">Tracker</span>
             </button>
           </Link>
           <ThemeToggle />

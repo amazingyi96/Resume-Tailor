@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  serverExternalPackages: ["jspdf", "docx", "pdfjs-dist", "mammoth"],
 };
 
 export default nextConfig;

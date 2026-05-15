@@ -1,4 +1,4 @@
-import type { StepMessage, ToneStyle } from "./types";
+import type { StepMessage, ToneStyle, ApplicationStatus, NoteType } from "./types";
 
 export const TONE_OPTIONS: { value: ToneStyle; label: string; description: string }[] = [
   {
@@ -43,3 +43,51 @@ export const WORKFLOW_STEPS: StepMessage[] = [
 ];
 
 export const APP_NAME = "ResumeTailor";
+
+// ── Job Application Tracker ──
+
+export const STORAGE_KEY_APPLICATIONS = "resumetailor_applications";
+
+export const APPLICATION_STATUSES: { value: ApplicationStatus; label: string }[] = [
+  { value: "saved", label: "Saved" },
+  { value: "applied", label: "Applied" },
+  { value: "phone_screen", label: "Phone Screen" },
+  { value: "interview", label: "Interview" },
+  { value: "offer", label: "Offer" },
+  { value: "accepted", label: "Accepted" },
+  { value: "rejected", label: "Rejected" },
+  { value: "withdrawn", label: "Withdrawn" },
+];
+
+export const NOTE_TYPE_LABELS: Record<NoteType, string> = {
+  general: "General",
+  research: "Research",
+  interview_prep: "Interview Prep",
+  reflection: "Reflection",
+  follow_up: "Follow-up",
+};
+
+export const INDUSTRY_OPTIONS = [
+  "Agriculture & Farming",
+  "Education & Training",
+  "Government & Public Sector",
+  "Healthcare & Medical",
+  "Hospitality & Tourism",
+  "Manufacturing & Logistics",
+  "Mining & Resources",
+  "Professional Services",
+  "Real Estate & Property",
+  "Retail & Consumer Goods",
+  "Technology & IT",
+  "Tourism & Events",
+  "Other",
+];
+
+export const JOB_TYPE_OPTIONS = [
+  "Full-time",
+  "Part-time",
+  "Contract",
+  "Casual",
+  "Fixed-term",
+  "Remote",
+];

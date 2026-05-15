@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+  "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.resumetailor.backup</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>/usr/bin/rsync</string>
+        <string>-avz</string>
+        <string>--exclude</string>
+        <string>node_modules</string>
+        <string>--exclude</string>
+        <string>.next</string>
+        <string>--exclude</string>
+        <string>backups</string>
+        <string>admin@YOUR_SERVER_IP:/opt/resumetailor/backups/</string>
+        <string>/Users/YOUR_USERNAME/backups/resumetailor/</string>
+    </array>
+
+    <key>StartCalendarInterval</key>
+    <dict>
+        <key>Weekday</key>
+        <integer>1</integer>
+        <key>Hour</key>
+        <integer>2</integer>
+        <key>Minute</key>
+        <integer>0</integer>
+    </dict>
+
+    <key>StandardOutPath</key>
+    <string>/Users/YOUR_USERNAME/Library/Logs/com.resumetailor.backup.log</string>
+
+    <key>StandardErrorPath</key>
+    <string>/Users/YOUR_USERNAME/Library/Logs/com.resumetailor.backup.log</string>
+
+    <key>RunAtLoad</key>
+    <false/>
+
+    <key>KeepAlive</key>
+    <false/>
+</dict>
+</plist>
